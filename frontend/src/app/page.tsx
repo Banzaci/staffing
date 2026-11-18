@@ -1,102 +1,108 @@
 
 "use client";
 
-import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { QRCodeSVG } from "qrcode.react";
-import { api } from "@/lib/api";
+import { useRouter } from "next/navigation";
+import {
+  BriefcaseBusiness,
+  UsersRound,
+  Volume2,
+  Hotel,
+  Sparkles,
+} from "lucide-react";
 
-type Payment = {
-  id: string;
-  amount: string;
-  currency: string;
-  network: string;
-  status: string;
-  payment_url: string;
-};
+export default function HomePage() {
+  const router = useRouter();
 
-const TEST_PAYMENT_ID = "e31559eb-8d2b-4be3-ac2d-73f1d6c168e5";
+  const speak = () => {
+    if (!("speechSynthesis" in window)) return;
 
-export default function Home() {
-  const [showPayment, setShowPayment] = useState(false);
+    window.speechSynthesis.cancel();
 
-  const {
-    data: payment,
-    isLoading,
-    isError,
-  } = useQuery({
-    queryKey: ["payment", TEST_PAYMENT_ID],
-    queryFn: () =>
-      api<Payment>(`/api/public/v1/payments/${TEST_PAYMENT_ID}`),
-    enabled: showPayment,
-    refetchInterval: (query) =>
-      query.state.data?.status === "paid" ? false : 5000,
-  });
+    const message = new SpeechSynthesisUtterance(
+      "Are you looking for a job, or looking for workers?"
+    );
 
-  const checkoutUrl =
-    payment && typeof window !== "undefined"
-      ? `${window.location.origin}/pay/${payment.id}`
-      : "";
+    message.lang = "en-US";
+    message.rate = 0.85;
+
+    window.speechSynthesis.speak(message);
+  };
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 p-6 font-sans dark:bg-black">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 text-center shadow-lg">
-        <h1 className="mb-2 text-2xl font-semibold text-zinc-900">
-          Crypto Payment
-        </h1>
-
-        {!showPayment ? (
+    <main className="min-h-dvh bg-gradient-to-br from-sky-500 via-blue-600 to-blue-900 px-5 py-8 text-white">
+      <div className="mx-auto flex min-h-[calc(100dvh-4rem)] max-w-lg flex-col">
+        <header className="flex justify-end">
           <button
-            onClick={() => setShowPayment(true)}
-            className="mt-6 rounded-xl bg-black px-6 py-3 text-white"
+            type="button"
+            onClick={speak}
+            aria-label="Listen to options"
+            className="rounded-full border border-white/40 bg-white/15 p-4 transition hover:bg-white/25"
           >
-            Show Payment
+            <Volume2 size={28} />
           </button>
-        ) : isLoading ? (
-          <p className="mt-6 text-zinc-500">
-            Loading payment...
-          </p>
-        ) : isError || !payment ? (
-          <p className="mt-6 text-red-600">
-            Payment not found.
-          </p>
-        ) : (
-          <div className="mt-6 flex flex-col items-center gap-5">
-            <div>
-              <p className="text-3xl font-bold text-zinc-900">
-                {payment.amount} {payment.currency}
-              </p>
-              <p className="mt-1 text-sm text-zinc-500">
-                Solana Devnet
-              </p>
+        </header>
+
+        <section className="flex flex-1 flex-col justify-center">
+          <div className="mb-12 text-center">
+            <div className="mb-5 flex justify-center">
+              <div className="relative">
+                <Hotel size={76} strokeWidth={1.5} />
+                <Sparkles
+                  size={25}
+                  className="absolute -right-6 top-0 text-sky-200"
+                />
+              </div>
             </div>
 
-            <div className="rounded-xl border border-zinc-200 bg-white p-5">
-              <QRCodeSVG
-                value={checkoutUrl}
-                size={240}
-                level="M"
-              />
-            </div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              Welcome!
+            </h1>
 
-            <p className="text-sm text-zinc-500">
-              Scan to open the payment page
+            <p className="mt-2 text-lg text-blue-100">
+              What are you looking for?
             </p>
+          </div>
 
-            <span className="rounded-full bg-amber-100 px-4 py-2 text-sm font-medium text-amber-800">
-              {payment.status}
-            </span>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="button"
+              onClick={() => router.push("/worker")}
+              className="flex min-h-64 flex-col items-center justify-center gap-6 rounded-3xl bg-white p-5 text-blue-800 shadow-xl transition active:scale-95"
+            >
+              <div className="rounded-3xl bg-sky-100 p-6">
+                <BriefcaseBusiness
+                  size={65}
+                  strokeWidth={1.5}
+                />
+              </div>
+
+              <span className="text-center text-xl font-bold">
+                Find a Job
+              </span>
+            </button>
 
             <button
-              onClick={() =>
-                navigator.clipboard.writeText(checkoutUrl)
-              }
-              className="text-sm font-medium text-blue-600 hover:underline"
+              type="button"
+              onClick={() => router.push("/employer")}
+              className="flex min-h-64 flex-col items-center justify-center gap-6 rounded-3xl bg-white p-5 text-blue-800 shadow-xl transition active:scale-95"
             >
-              Copy payment link
+              <div className="rounded-3xl bg-sky-100 p-6">
+                <UsersRound
+                  size={65}
+                  strokeWidth={1.5}
+                />
+              </div>
+
+              <span className="text-center text-xl font-bold">
+                Find Workers
+              </span>
             </button>
           </div>
-        )}
+        </section>
+
+        <footer className="pt-10 text-center text-sm text-blue-100">
+          Hospitality jobs made simple
+        </footer>
       </div>
     </main>
   );

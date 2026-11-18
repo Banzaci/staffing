@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
-
+from app.models.shift_application import ShiftApplication
 from app.auth.dependencies import get_current_user
 from app.db.session import get_db
 from app.models.user import User
@@ -91,3 +91,34 @@ async def get_my_worker_profile(
         "longitude": worker.longitude,
         "willing_to_travel": worker.willing_to_travel,
     }
+
+
+@router.get("/me/applications")
+async def get_my_shift_applications(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    result = await db.execute(
+        select(ShiftApplication)
+        .join(
+            WorkerProfile,
+            ShiftApplication.worker_profile_id == WorkerProfile.id,
+        )
+        .where(
+            WorkerProfile.user_id == user.id,
+            ShiftApplication.deleted_at.is_(None),
+        )
+        .order_by(ShiftApplication.created_at.desc())
+    )
+
+    applications = result.scalars().all()
+
+    return [
+        {
+            "id": application.id,
+            "job_shift_id": application.job_shift_id,
+            "status": application.status,
+            "created_at": application.created_at,
+        }
+        for application in applications
+    ]
