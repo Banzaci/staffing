@@ -1,0 +1,120 @@
+INSERT INTO languages (code, name)
+VALUES
+    ('en', 'English'),
+    ('sv', 'Swedish'),
+    ('de', 'German'),
+    ('fr', 'French'),
+    ('ceb', 'Cebuano')
+ON CONFLICT (code) DO NOTHING;
+
+INSERT INTO business_types (id, code)
+VALUES
+    (gen_random_uuid(), 'hotel'),
+    (gen_random_uuid(), 'restaurant'),
+    (gen_random_uuid(), 'guesthouse'),
+    (gen_random_uuid(), 'hostel'),
+    (gen_random_uuid(), 'cafe'),
+    (gen_random_uuid(), 'bar')
+ON CONFLICT (code) DO NOTHING;
+
+------------------------------------------------------
+
+INSERT INTO business_type_translations (
+    business_type_id,
+    language_code,
+    name
+)
+SELECT bt.id, translations.language_code, translations.name
+FROM (
+    VALUES
+        ('hotel', 'en', 'Hotel'),
+        ('hotel', 'sv', 'Hotell'),
+        ('restaurant', 'en', 'Restaurant'),
+        ('restaurant', 'sv', 'Restaurang'),
+        ('guesthouse', 'en', 'Guesthouse'),
+        ('guesthouse', 'sv', 'Gästhus'),
+        ('hostel', 'en', 'Hostel'),
+        ('hostel', 'sv', 'Vandrarhem'),
+        ('cafe', 'en', 'Café'),
+        ('cafe', 'sv', 'Kafé'),
+        ('bar', 'en', 'Bar'),
+        ('bar', 'sv', 'Bar')
+) AS translations(type_code, language_code, name)
+JOIN business_types bt ON bt.code = translations.type_code
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM business_type_translations existing
+    WHERE existing.business_type_id = bt.id
+      AND existing.language_code = translations.language_code
+);
+
+------------------------------------------------------
+
+INSERT INTO skills (id, name)
+VALUES
+    (gen_random_uuid(), 'receptionist'),
+    (gen_random_uuid(), 'waiter'),
+    (gen_random_uuid(), 'cook'),
+    (gen_random_uuid(), 'housekeeper'),
+    (gen_random_uuid(), 'bartender'),
+    (gen_random_uuid(), 'barista'),
+    (gen_random_uuid(), 'kitchen_assistant'),
+    (gen_random_uuid(), 'maintenance'),
+    (gen_random_uuid(), 'gardener'),
+    (gen_random_uuid(), 'security')
+ON CONFLICT (name) DO NOTHING;
+
+------------------------------------------------------
+
+INSERT INTO skill_translations (
+    id,
+    skill_id,
+    language_code,
+    name
+)
+SELECT
+    gen_random_uuid(),
+    s.id,
+    t.language_code,
+    t.name
+FROM (
+    VALUES
+        ('receptionist', 'en', 'Receptionist'),
+        ('receptionist', 'sv', 'Receptionist'),
+        ('waiter', 'en', 'Waiter'),
+        ('waiter', 'sv', 'Servitör'),
+        ('cook', 'en', 'Cook'),
+        ('cook', 'sv', 'Kock'),
+        ('housekeeper', 'en', 'Housekeeper'),
+        ('housekeeper', 'sv', 'Hotellstädare'),
+        ('bartender', 'en', 'Bartender'),
+        ('bartender', 'sv', 'Bartender'),
+        ('barista', 'en', 'Barista'),
+        ('barista', 'sv', 'Barista'),
+        ('kitchen_assistant', 'en', 'Kitchen Assistant'),
+        ('kitchen_assistant', 'sv', 'Köksbiträde'),
+        ('maintenance', 'en', 'Maintenance Worker'),
+        ('maintenance', 'sv', 'Fastighetsskötare'),
+        ('gardener', 'en', 'Gardener'),
+        ('gardener', 'sv', 'Trädgårdsarbetare'),
+        ('security', 'en', 'Security Guard'),
+        ('security', 'sv', 'Väktare')
+) AS t(skill_name, language_code, name)
+JOIN skills s ON s.name = t.skill_name
+WHERE NOT EXISTS (
+    SELECT 1
+    FROM skill_translations existing
+    WHERE existing.skill_id = s.id
+      AND existing.language_code = t.language_code
+);
+
+------------------------------------------------------
+
+SELECT
+    s.id,
+    s.name AS code,
+    st.name AS display_name
+FROM skills s
+JOIN skill_translations st ON st.skill_id = s.id
+WHERE st.language_code = 'en'
+ORDER BY s.name;
