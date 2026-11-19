@@ -1,98 +1,128 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  SafeAreaView,
+} from "react-native";
+import { useRouter } from "expo-router";
+import { useApp } from "@/providers/AppProvider";
+import {
+  BriefcaseBusiness,
+  UsersRound,
+  ChevronRight,
+} from "lucide-react-native";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
+export default function WelcomeScreen() {
+  const router = useRouter();
+  const { setRole } = useApp();
+
+  async function selectRole(role: "worker" | "employer") {
+    await setRole(role);
+    router.push("/login");
   }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <SafeAreaView style={styles.container}>
+      <View style={styles.content}>
+        <Text style={styles.emoji}>👋</Text>
+        <Text style={styles.title}>Welcome!</Text>
+        <Text style={styles.subtitle}>
+          What would you like to do?
+        </Text>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+        <View style={styles.options}>
+          <Pressable style={styles.card} onPress={() => selectRole("worker")}>
+            <View style={styles.iconBox}>
+              <BriefcaseBusiness size={44} color="#155BC7" />
+            </View>
+            <View style={styles.cardText}>
+              <Text style={styles.cardTitle}>Find a Job</Text>
+              <Text style={styles.description}>
+                Find work and earn money
+              </Text>
+            </View>
+            <ChevronRight size={24} color="#155BC7" />
+          </Pressable>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          <Pressable style={styles.card} onPress={() => selectRole("employer")}>
+            <View style={styles.iconBox}>
+              <UsersRound size={44} color="#155BC7" />
+            </View>
+            <View style={styles.cardText}>
+              <Text style={styles.cardTitle}>Hire Staff</Text>
+              <Text style={styles.description}>
+                Find people to help your business
+              </Text>
+            </View>
+            <ChevronRight size={24} color="#155BC7" />
+          </Pressable>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+    backgroundColor: "#F5F9FF",
   },
-  safeArea: {
+  content: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+    justifyContent: "center",
+    paddingHorizontal: 24,
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  emoji: {
+    fontSize: 64,
+    textAlign: "center",
+    marginBottom: 16,
   },
   title: {
-    textAlign: 'center',
+    fontSize: 36,
+    fontWeight: "800",
+    color: "#153B70",
+    textAlign: "center",
   },
-  code: {
-    textTransform: 'uppercase',
+  subtitle: {
+    fontSize: 18,
+    color: "#64748B",
+    textAlign: "center",
+    marginTop: 10,
+    marginBottom: 48,
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  options: {
+    gap: 20,
+  },
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 24,
+    padding: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+    borderWidth: 1,
+    borderColor: "#DFEAF9",
+  },
+  iconBox: {
+    width: 76,
+    height: 76,
+    borderRadius: 20,
+    backgroundColor: "#EAF2FF",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cardText: {
+    flex: 1,
+  },
+  cardTitle: {
+    fontSize: 21,
+    fontWeight: "700",
+    color: "#153B70",
+  },
+  description: {
+    fontSize: 14,
+    color: "#64748B",
+    marginTop: 5,
   },
 });

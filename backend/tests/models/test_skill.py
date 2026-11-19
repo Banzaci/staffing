@@ -1,11 +1,9 @@
-
 import uuid
 
 from app.models.skill import Skill
 from app.models.worker_skill import WorkerSkill
-
-
 from app.models.skill_translation import SkillTranslation
+from app.models.worker_skill_preference import WorkerSkillPreference
 
 
 def test_skill_translation():
@@ -23,9 +21,9 @@ def test_skill_translation():
 
 
 def test_create_skill():
-    skill = Skill(name="Bartender")
+    skill = Skill(code="bartender")
 
-    assert skill.name == "Bartender"
+    assert skill.code == "bartender"
     assert skill.id is None
 
 
@@ -51,3 +49,16 @@ def test_worker_skill_default():
     )
 
     assert worker_skill.years_experience is None
+
+
+def test_create_worker_skill_preference():
+    worker_profile_id = uuid.uuid4()
+    skill_id = uuid.uuid4()
+
+    preference = WorkerSkillPreference(
+        worker_profile_id=worker_profile_id,
+        skill_id=skill_id,
+    )
+
+    assert preference.worker_profile_id == worker_profile_id
+    assert preference.skill_id == skill_id

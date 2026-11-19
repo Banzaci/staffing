@@ -66,6 +66,7 @@ async def register(
         first_name=payload.first_name,
         last_name=payload.last_name,
         preferred_language=payload.preferred_language,
+        role=payload.role,
     )
 
     db.add(user)

@@ -1,3 +1,4 @@
+from app.models.user import UserRole
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 class LoginRequest(BaseModel):
@@ -18,6 +19,7 @@ class RegisterRequest(BaseModel):
     password: str = Field(min_length=8)
     first_name: str = Field(min_length=1)
     last_name: str = Field(min_length=1)
+    role: UserRole
     preferred_language: str = Field(default="en", min_length=2, max_length=10)
 
 class TokenResponse(BaseModel):

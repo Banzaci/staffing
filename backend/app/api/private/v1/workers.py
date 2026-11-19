@@ -1,4 +1,10 @@
+import uuid
 
+from pydantic import BaseModel
+from sqlalchemy import delete
+
+from app.models.skill import Skill
+from app.models.worker_skill_preference import WorkerSkillPreference
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -9,9 +15,87 @@ from app.db.session import get_db
 from app.models.user import User
 from app.models.worker_profile import WorkerProfile
 from app.schemas.worker_profile import WorkerProfileCreate
+from app.schemas.worker_preferences import WorkerPreferencesUpdate
 
 router = APIRouter(prefix="/workers", tags=["Workers"])
 
+@router.get("/me/preferences")
+async def get_my_preferences(
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    worker = await db.scalar(
+        select(WorkerProfile).where(
+            WorkerProfile.user_id == user.id
+        )
+    )
+
+    if worker is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Worker profile not found",
+        )
+
+    result = await db.execute(
+        select(WorkerSkillPreference.skill_id).where(
+            WorkerSkillPreference.worker_profile_id == worker.id
+        )
+    )
+
+    return {"skill_ids": result.scalars().all()}
+
+@router.put("/me/preferences")
+async def update_my_preferences(
+    payload: WorkerPreferencesUpdate,
+    db: AsyncSession = Depends(get_db),
+    user: User = Depends(get_current_user),
+):
+    worker = await db.scalar(
+        select(WorkerProfile).where(
+            WorkerProfile.user_id == user.id
+        )
+    )
+
+    if worker is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Worker profile not found",
+        )
+
+    skill_ids = list(dict.fromkeys(payload.skill_ids))
+
+    if skill_ids:
+        result = await db.execute(
+            select(Skill.id).where(Skill.id.in_(skill_ids))
+        )
+
+        existing_ids = set(result.scalars().all())
+
+        if len(existing_ids) != len(skill_ids):
+            raise HTTPException(
+                status_code=400,
+                detail="One or more skills do not exist",
+            )
+
+    await db.execute(
+        delete(WorkerSkillPreference).where(
+            WorkerSkillPreference.worker_profile_id == worker.id
+        )
+    )
+
+    db.add_all(
+        [
+            WorkerSkillPreference(
+                worker_profile_id=worker.id,
+                skill_id=skill_id,
+            )
+            for skill_id in skill_ids
+        ]
+    )
+
+    await db.commit()
+
+    return {"skill_ids": skill_ids}
 
 @router.post("", status_code=201)
 async def create_worker_profile(
@@ -62,7 +146,6 @@ async def create_worker_profile(
         "willing_to_travel": worker.willing_to_travel,
     }
 
-
 @router.get("/me")
 async def get_my_worker_profile(
     db: AsyncSession = Depends(get_db),
@@ -91,7 +174,6 @@ async def get_my_worker_profile(
         "longitude": worker.longitude,
         "willing_to_travel": worker.willing_to_travel,
     }
-
 
 @router.get("/me/applications")
 async def get_my_shift_applications(

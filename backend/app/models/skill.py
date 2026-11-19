@@ -6,7 +6,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 from app.db.base import Base
 
-
 class Skill(Base):
     __tablename__ = "skills"
 
@@ -15,7 +14,7 @@ class Skill(Base):
         default=uuid.uuid4,
     )
 
-    name: Mapped[str] = mapped_column(
+    code: Mapped[str] = mapped_column(
         String(100),
         unique=True,
         nullable=False,
