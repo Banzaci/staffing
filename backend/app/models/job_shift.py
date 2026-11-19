@@ -1,12 +1,9 @@
 
 import uuid
 from datetime import datetime, timezone
-
 from sqlalchemy import DateTime, ForeignKey, Integer, Numeric, String
 from sqlalchemy.orm import Mapped, mapped_column
-
 from app.db.base import Base
-
 
 class JobShift(Base):
     __tablename__ = "job_shifts"
@@ -56,6 +53,11 @@ class JobShift(Base):
         String(20),
         default="open",
         nullable=False,
+    )
+
+    description: Mapped[str | None] = mapped_column(
+        String(500),
+        nullable=True,
     )
 
     created_at: Mapped[datetime] = mapped_column(

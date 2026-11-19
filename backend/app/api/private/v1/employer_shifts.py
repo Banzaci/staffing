@@ -1,7 +1,7 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from app.models.business import Business
@@ -15,7 +15,6 @@ from app.models.user import User
 from app.schemas.job_shift import JobShiftCreate
 
 router = APIRouter(prefix="/employer/shifts", tags=["Employer Shifts"])
-
 
 @router.post("", status_code=201)
 async def create_job_shift(

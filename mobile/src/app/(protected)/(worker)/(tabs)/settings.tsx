@@ -62,7 +62,7 @@ export default function Screen() {
           subtitle="Your current location and preferred areas"
           icon={MapPin}
           iconColor="#10B981"
-          onPress={() => router.push("/locations")}
+          onPress={() => router.push("/(protected)/(worker)/(settings)/locations")}
         />
 
         <SettingsButton

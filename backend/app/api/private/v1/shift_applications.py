@@ -14,9 +14,7 @@ from app.models.shift_application import ShiftApplication
 from app.models.user import User
 from app.services.shift_approval import approve_shift_application
 
-
 router = APIRouter(prefix="/shift-applications", tags=["Shift Applications"])
-
 
 @router.post("/{application_id}/approve")
 async def approve_application(
@@ -53,8 +51,6 @@ async def approve_application(
         "id": str(approved.id),
         "status": approved.status,
     }
-
-
 
 @router.post("/{application_id}/reject")
 async def reject_application(
@@ -100,7 +96,6 @@ async def reject_application(
         "id": str(application.id),
         "status": application.status,
     }
-
 
 @router.post("/{application_id}/withdraw")
 async def withdraw_application(

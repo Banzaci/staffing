@@ -7,9 +7,13 @@ from app.api.private.v1 import businesses
 from app.api.private.v1 import workers
 from app.api.private.v1 import session
 from app.api.private.v1 import skills
+from app.api.private.v1 import job_shifts
+from app.api.private.v1 import worker_shift
 
 router = APIRouter(prefix="/api/private/v1")
 
+router.include_router(worker_shift.router)
+router.include_router(job_shifts.router)
 router.include_router(workers.router)
 router.include_router(session.router)
 router.include_router(businesses.router)
